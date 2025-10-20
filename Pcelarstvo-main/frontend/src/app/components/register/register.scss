@@ -1,0 +1,69 @@
+.topbar {
+  background: #0b3558; 
+  color: #fff;
+
+  .brand {
+    font-size: 20px;
+    font-weight: normal; 
+    letter-spacing: 0.3px;
+  }
+
+  a[mat-button] {
+    color: #fff;
+    opacity: 0.9;
+    font-weight: normal; 
+  }
+
+  a[mat-button]:hover { opacity: 1; }
+}
+
+.spacer { flex: 1 1 auto; }
+
+.register-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  box-shadow:
+    0 4px 6px rgba(0,0,0,0.1),
+    0 8px 24px rgba(0,0,0,0.18),
+    0 12px 48px rgba(0,0,0,0.18);
+}
+
+mat-card-title {
+  font-weight: normal; 
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.register-button {
+  width: 100%;
+  background-color: #a7beff;
+  color: #fff;
+  font-weight: normal; 
+}
+
+.register-button:hover {
+  background-color: #a7beff;
+}
+
+.error {
+  margin-top: 12px;
+  color: #d32f2f;
+  text-align: center;
+}
+
+.success {
+  margin-top: 12px;
+  color: #2e7d32;
+  text-align: center;
+}

@@ -1,0 +1,217 @@
+<mat-toolbar class="topbar">
+  <span class="brand">Beekeeping</span>
+  <span class="spacer"></span>
+  <a mat-button (click)="environment()">Environment</a>
+  <a mat-button (click)="logout()">Logout</a>
+</mat-toolbar>
+
+<div class="page">
+  <form [formGroup]="form">
+    <mat-card class="card filter-bar">
+      <div class="bar">
+        <mat-form-field appearance="outline" class="ctrl">
+          <mat-label>From</mat-label>
+          <input matInput [matDatepicker]="dp1" formControlName="from">
+          <mat-datepicker-toggle matSuffix [for]="dp1">
+            <mat-icon matDatepickerToggleIcon>event</mat-icon>
+          </mat-datepicker-toggle>
+          <mat-datepicker #dp1></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="ctrl">
+          <mat-label>To</mat-label>
+          <input matInput [matDatepicker]="dp2" formControlName="to">
+          <mat-datepicker-toggle matSuffix [for]="dp2">
+            <mat-icon matDatepickerToggleIcon>event</mat-icon>
+          </mat-datepicker-toggle>
+          <mat-datepicker #dp2></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="ctrl" *ngIf="activeTab === 0">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">(any)</mat-option>
+            <mat-option value="ASSIGNED">ASSIGNED</mat-option>
+            <mat-option value="DONE">DONE</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-flat-button class="apply" (click)="applyFilters()">
+          <mat-icon>filter_alt</mat-icon>
+          Apply
+        </button>
+      </div>
+    </mat-card>
+  </form>
+
+  <mat-tab-group (selectedIndexChange)="tabChanged($event)">
+    <!-- TASKS TAB -->
+    <mat-tab label="Tasks">
+      <mat-card class="card table-card">
+        <div class="table-wrap">
+          <table
+            mat-table
+            [dataSource]="tasks.data"
+            matSort
+            (matSortChange)="sortChanged('tasks', $event)"
+          >
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+              <td mat-cell *matCellDef="let r">{{ r.id }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+              <td mat-cell *matCellDef="let r">{{ r.title }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="start_at">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Start</th>
+              <td mat-cell *matCellDef="let r">{{ r.start_at | date:'yyyy-MM-dd HH:mm' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="end_at">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>End</th>
+              <td mat-cell *matCellDef="let r">{{ r.end_at | date:'yyyy-MM-dd HH:mm' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="assignments_total">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+              <td mat-cell *matCellDef="let r">{{ r.assignments_total }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="assignments_done">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Done</th>
+              <td mat-cell *matCellDef="let r">{{ r.assignments_done }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="source_type">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Source</th>
+              <td mat-cell *matCellDef="let r">{{ r.source_type }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="tasksCols"></tr>
+            <tr mat-row *matRowDef="let row; columns: tasksCols;"></tr>
+          </table>
+        </div>
+
+        <mat-paginator #pTasks
+          [length]="tasks.total"
+          [pageIndex]="tasks.page - 1"
+          [pageSize]="tasks.pageSize"
+          [pageSizeOptions]="[5,10,20,50]"
+          (page)="pageEvent('tasks', $event.pageIndex, $event.pageSize)">
+        </mat-paginator>
+
+        <div class="loading" *ngIf="tasks.loading">Loading…</div>
+        <div class="error" *ngIf="tasks.error">{{ tasks.error }}</div>
+      </mat-card>
+    </mat-tab>
+
+    <!-- COMMENTS TAB -->
+    <mat-tab label="Comments">
+      <mat-card class="card table-card">
+        <div class="table-wrap">
+          <table
+            mat-table
+            [dataSource]="comments.data"
+            matSort
+            (matSortChange)="sortChanged('comments', $event)"
+          >
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+              <td mat-cell *matCellDef="let r">{{ r.id }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="task_title">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Task</th>
+              <td mat-cell *matCellDef="let r">{{ r.task_title }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="author">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Author</th>
+              <td mat-cell *matCellDef="let r">{{ r.name }} {{ r.surname }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="content">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Comment</th>
+              <td mat-cell *matCellDef="let r">{{ r.content }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="created_at">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+              <td mat-cell *matCellDef="let r">{{ r.created_at | date:'yyyy-MM-dd HH:mm' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="commentsCols"></tr>
+            <tr mat-row *matRowDef="let row; columns: commentsCols;"></tr>
+          </table>
+        </div>
+
+        <mat-paginator #pComments
+          [length]="comments.total"
+          [pageIndex]="comments.page - 1"
+          [pageSize]="comments.pageSize"
+          [pageSizeOptions]="[5,10,20,50]"
+          (page)="pageEvent('comments', $event.pageIndex, $event.pageSize)">
+        </mat-paginator>
+
+        <div class="loading" *ngIf="comments.loading">Loading…</div>
+        <div class="error" *ngIf="comments.error">{{ comments.error }}</div>
+      </mat-card>
+    </mat-tab>
+
+    <!-- COMPLETED TAB -->
+    <mat-tab label="Completed">
+      <mat-card class="card table-card">
+        <div class="table-wrap">
+          <table
+            mat-table
+            [dataSource]="completed.data"
+            matSort
+            (matSortChange)="sortChanged('completed', $event)"
+          >
+            <ng-container matColumnDef="assignment_id">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+              <td mat-cell *matCellDef="let r">{{ r.assignment_id }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="task_title">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Task</th>
+              <td mat-cell *matCellDef="let r">{{ r.task_title }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="beekeeper">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Beekeeper</th>
+              <td mat-cell *matCellDef="let r">{{ r.name }} {{ r.surname }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="done_at">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Done at</th>
+              <td mat-cell *matCellDef="let r">{{ r.done_at | date:'yyyy-MM-dd HH:mm' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="result_note">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Note</th>
+              <td mat-cell *matCellDef="let r">{{ r.result_note }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="completedCols"></tr>
+            <tr mat-row *matRowDef="let row; columns: completedCols;"></tr>
+          </table>
+        </div>
+
+        <mat-paginator #pCompleted
+          [length]="completed.total"
+          [pageIndex]="completed.page - 1"
+          [pageSize]="completed.pageSize"
+          [pageSizeOptions]="[5,10,20,50]"
+          (page)="pageEvent('completed', $event.pageIndex, $event.pageSize)">
+        </mat-paginator>
+
+        <div class="loading" *ngIf="completed.loading">Loading…</div>
+        <div class="error" *ngIf="completed.error">{{ completed.error }}</div>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
+</div>

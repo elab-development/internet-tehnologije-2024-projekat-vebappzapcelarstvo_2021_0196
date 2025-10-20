@@ -1,0 +1,56 @@
+<mat-toolbar class="topbar">
+  <span class="brand">Beekeeping</span>
+  <span class="spacer"></span>
+  <button mat-button (click)="exportPdf()">Export PDF</button>
+  <button mat-button (click)="logout()">Logout</button>
+</mat-toolbar>
+
+<div class="page">
+  <mat-card class="card" #calendarCard>
+    <mat-card-header>
+      <mat-card-title>User Calendar</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="cal-header">
+        <button mat-stroked-button (click)="onPrevMonth()"><mat-icon>chevron_left</mat-icon></button>
+        <div class="month-label">{{ viewMonth | date:'MMMM yyyy' }}</div>
+        <button mat-stroked-button (click)="onNextMonth()"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+
+      <div class="cal-grid">
+        <div class="dow">Mon</div><div class="dow">Tue</div><div class="dow">Wed</div>
+        <div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div><div class="dow">Sun</div>
+
+        <div *ngFor="let d of daysGrid"
+             class="day"
+             [class.outside]="d.date.getMonth() !== viewMonth.getMonth()"
+             [class.day-done]="d.status === 'DONE'"
+             [class.day-future]="d.status === 'ASSIGNED_FUTURE'"
+             [class.day-past]="d.status === 'ASSIGNED_PAST'"
+             [class.clickable]="(d.tasks?.length || 0) > 0 && !!d.status"
+             (click)="onDayClick(d)">
+          <span class="num">{{ d.label }}</span>
+
+          <div class="tasks" *ngIf="d.tasks?.length">
+            <div class="task" *ngFor="let t of d.tasks | slice:0:3">
+              <div class="task-title"><i><b>{{ t.title }}</b></i></div>
+              <div class="task-desc">{{ t.description }}</div>
+            </div>
+            <div class="more" *ngIf="(d.tasks?.length || 0) > 3">
+              +{{ d.tasks!.length - 3 }} more
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="swatch done"></span> Done
+        <span class="swatch future"></span> To be done
+        <span class="swatch past"></span> Overdue
+      </div>
+
+      <div class="loading" *ngIf="loading">Loading…</div>
+      <div class="error" *ngIf="error">{{ error }}</div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,44 @@
+<mat-toolbar class="topbar">
+  <span class="brand">Beekeeping</span>
+  <span class="spacer"></span>
+  <a mat-button (click)="login()">Login</a>
+</mat-toolbar>
+
+<div class="register-page">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <mat-card-title>Register</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form (ngSubmit)="register()" class="register-form">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput [(ngModel)]="username" name="username" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput [(ngModel)]="password" name="password" type="password" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>First Name</mat-label>
+          <input matInput [(ngModel)]="name" name="name" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Last Name</mat-label>
+          <input matInput [(ngModel)]="surname" name="surname" required>
+        </mat-form-field>
+
+        <button mat-raised-button class="register-button" type="submit">
+          Register
+        </button>
+
+        <p class="success" *ngIf="message">{{ message }}</p>
+        <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

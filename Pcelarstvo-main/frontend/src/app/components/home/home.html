@@ -1,0 +1,40 @@
+<mat-toolbar class="topbar">
+  <span class="brand">Beekeeping</span>
+  <span class="spacer"></span>
+  <a mat-button routerLink="/login">Login</a>
+  <a mat-button routerLink="/register">Register</a>
+</mat-toolbar>
+
+<div class="page">
+  <h2 class="title">Welcome to Beekeeping!</h2>
+
+  <div class="grid">
+    <mat-card class="card">
+      <mat-card-header>
+        <mat-card-title>Executed tasks by month</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <google-chart
+          [type]="completionsChart.chartType"
+          [data]="completionsChart.data"
+          [columns]="completionsChart.columns"
+          [options]="completionsChart.options">
+        </google-chart>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card">
+      <mat-card-header>
+        <mat-card-title>Comments by beekeeper</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <google-chart
+          [type]="commentsChart.chartType"
+          [data]="commentsChart.data"
+          [columns]="commentsChart.columns"
+          [options]="commentsChart.options">
+        </google-chart>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

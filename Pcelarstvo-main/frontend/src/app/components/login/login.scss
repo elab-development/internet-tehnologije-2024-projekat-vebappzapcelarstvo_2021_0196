@@ -1,0 +1,67 @@
+.topbar {
+  background: #0b3558; 
+  color: #fff;
+  .brand {
+    font-size: 20px;
+    font-weight: normal;
+    letter-spacing: 0.3px;
+  }
+  a[mat-button] {
+    color: #fff;
+    opacity: 0.9;
+    font-weight: normal;
+  }
+  a[mat-button]:hover {
+    opacity: 1;
+  }
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 16px;
+  box-shadow:
+    0 4px 6px rgba(0,0,0,0.1),
+    0 8px 24px rgba(0,0,0,0.18),
+    0 12px 48px rgba(0,0,0,0.18);
+}
+
+mat-card-title {
+  font-weight: normal; 
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.login-button {
+  width: 100%;
+  background-color: #a7beff;
+  color: white;
+  font-weight: normal; 
+}
+
+.login-button:hover {
+  background-color: #a7beff;
+}
+
+.error {
+  margin-top: 12px;
+  color: red;
+  text-align: center;
+}
+
+.link-row { display: flex; justify-content: center; margin: -4px 0 8px; }
+.link-btn { padding: 0 4px; min-width: auto; text-decoration: underline; }

@@ -1,0 +1,68 @@
+.topbar {
+  background: #0b3558; 
+  color: #fff;
+
+  .brand {
+    font-size: 20px;
+    font-weight: normal; 
+    letter-spacing: 0.3px;
+  }
+
+  a[mat-button] {
+    color: #fff;
+    opacity: 0.9;
+    font-weight: normal; 
+  }
+
+  a[mat-button]:hover {
+    opacity: 1;
+  }
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.page {
+  padding: 24px;
+}
+
+.title {
+  margin: 0 0 16px;
+  font-weight: normal; 
+  color: #0b3558;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card {
+  border-radius: 16px;
+  box-shadow:
+    0 4px 6px rgba(0,0,0,0.1),
+    0 8px 24px rgba(0,0,0,0.18),
+    0 12px 48px rgba(0,0,0,0.18);
+}
+
+mat-card-header {
+  padding-bottom: 0;
+}
+
+mat-card-title {
+  font-weight: normal; 
+}
+
+google-chart {
+  display: block;
+  width: 100%;
+  height: 360px;
+}

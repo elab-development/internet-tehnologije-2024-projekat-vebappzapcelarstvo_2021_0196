@@ -1,0 +1,234 @@
+<mat-toolbar class="topbar">
+  <span class="brand">Beekeeping</span>
+  <span class="spacer"></span>
+  <a mat-button routerLink="/overview">Overview</a>
+  <a mat-button (click)="logout()">Logout</a>
+</mat-toolbar>
+
+<div class="page">
+  <div class="layout">
+    <!-- LEFT COLUMN -->
+    <div class="left">
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>Weather forecast ({{ daysWeather }} days)</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="loadingWeather" class="loading">Loading weather…</div>
+          <div *ngIf="weatherError" class="error">{{ weatherError }}</div>
+          <google-chart
+            *ngIf="!loadingWeather && !weatherError"
+            [type]="weatherChart.chartType"
+            [columns]="weatherChart.columns"
+            [data]="weatherChart.data"
+            [options]="weatherChart.options">
+          </google-chart>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>Air quality (O₃, NO₂, SO₂, CO, PM2.5)</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="loadingAQ" class="loading">Loading air quality…</div>
+          <div *ngIf="aqError" class="error">{{ aqError }}</div>
+          <google-chart
+            *ngIf="!loadingAQ && !aqError"
+            [type]="airChart.chartType"
+            [columns]="airChart.columns"
+            [data]="airChart.data"
+            [options]="airChart.options">
+          </google-chart>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right">
+      <mat-card class="card right-box">
+        <mat-card-header>
+          <mat-card-title>Admin tools</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="admin-content">
+          <mat-tab-group>
+            <!-- TAB 1: Calendar -->
+            <mat-tab label="Calendar">
+              <div class="tab-content">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Select beekeeper (username)</mat-label>
+                  <mat-select [(value)]="selectedBeekeeperId" (selectionChange)="onBeekeeperSelected()">
+                    <mat-option *ngFor="let b of beekeepers" [value]="b.id">
+                      {{ b.username }} — {{ b.name }} {{ b.surname }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <!-- Month controller -->
+                <div class="cal-header" *ngIf="selectedBeekeeperId">
+                  <button mat-stroked-button (click)="onPrevMonth()"><mat-icon>chevron_left</mat-icon></button>
+                  <div class="month-label">
+                    {{ viewMonth | date:'MMMM yyyy' }}
+                  </div>
+                  <button mat-stroked-button (click)="onNextMonth()"><mat-icon>chevron_right</mat-icon></button>
+                </div>
+
+                <!-- Days labels -->
+                <div class="cal-grid" *ngIf="selectedBeekeeperId">
+                  <div class="dow">Mon</div><div class="dow">Tue</div><div class="dow">Wed</div>
+                  <div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div><div class="dow">Sun</div>
+
+                  <div *ngFor="let d of daysGrid"
+                    class="day"
+                    [class.outside]="d.date.getMonth() !== viewMonth.getMonth()"
+                    [class.day-done]="d.status === 'DONE'"
+                    [class.day-future]="d.status === 'ASSIGNED_FUTURE'"
+                    [class.day-past]="d.status === 'ASSIGNED_PAST'">
+                    <span class="num">{{ d.label }}</span>
+
+                    <!-- Task descriptions -->
+                    <div class="tasks" *ngIf="d.descriptions?.length">
+                      <div class="task" *ngFor="let t of d.descriptions | slice:0:3" [title]="t">
+                        {{ t }}
+                      </div>
+                      <div class="more" *ngIf="(d.descriptions?.length || 0) > 3">
+                        +{{ d.descriptions!.length - 3 }} more
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="legend" *ngIf="selectedBeekeeperId">
+                  <span class="swatch done"></span> Done
+                  <span class="swatch future"></span> To be done
+                  <span class="swatch past"></span> Overdue
+                </div>
+
+                <div class="muted" *ngIf="!beekeepers.length">No users found.</div>
+              </div>
+            </mat-tab>
+
+            <!-- TAB 2: Task Assignment -->
+            <mat-tab label="Task Assignment">
+              <div class="tab-content">
+                <!-- Select beekeeper -->
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Select beekeeper (username)</mat-label>
+                  <mat-select [(value)]="selectedBeekeeperId">
+                    <mat-option *ngFor="let b of beekeepers" [value]="b.id">
+                      {{ b.username }} — {{ b.name }} {{ b.surname }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <!-- Select existing task -->
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Select existing future task (optional)</mat-label>
+                  <mat-select [(value)]="selectedTaskId">
+                    <mat-option [value]="null">— None —</mat-option>
+                    <mat-option *ngFor="let t of futureTasks" [value]="t.id" matTooltip="{{ t.description }}">
+                      {{ t.title }} — {{ t.start_at | date:'dd/MM/yyyy' }} → {{ t.end_at | date:'dd/MM/yyyy' }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <!-- OR Create new task -->
+                <div class="new-task-form" *ngIf="!selectedTaskId">
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Title</mat-label>
+                    <input matInput [(ngModel)]="newTask.title">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput rows="3" [(ngModel)]="newTask.description"></textarea>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Start Date</mat-label>
+                    <input matInput [matDatepicker]="picker1" [(ngModel)]="newTask.start_at">
+                    <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                    <mat-datepicker #picker1></mat-datepicker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>End Date</mat-label>
+                    <input matInput [matDatepicker]="picker2" [(ngModel)]="newTask.end_at">
+                    <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                    <mat-datepicker #picker2></mat-datepicker>
+                  </mat-form-field>
+                </div>
+
+                <!-- Assign button -->
+                <button mat-raised-button color="primary"
+                        (click)="assignTask()"
+                        [disabled]="!selectedBeekeeperId || (!selectedTaskId && !newTask.title)">
+                  Assign Task
+                </button>
+
+                <!-- Status -->
+                <div class="muted" *ngIf="assignMessage">{{ assignMessage }}</div>
+              </div>
+            </mat-tab>
+
+            <!-- TAB 3: Task Modification -->
+            <mat-tab label="Task Modification">
+              <div class="tab-content">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Select future task</mat-label>
+                  <mat-select [(value)]="selectedEditTaskId" (selectionChange)="onPickTaskForEdit()">
+                    <mat-option [value]="null">— None —</mat-option>
+                    <mat-option *ngFor="let t of editTasks" [value]="t.id" [matTooltip]="t.description || ''">
+                      {{ t.title }} — {{ t.start_at | date:'dd/MM/yyyy' }} → {{ t.end_at | date:'dd/MM/yyyy' }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <div *ngIf="selectedEditTaskId" class="new-task-form">
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Title</mat-label>
+                    <input matInput [(ngModel)]="editTask.title">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Description</mat-label>
+                    <textarea matInput rows="3" [(ngModel)]="editTask.description"></textarea>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Start Date</mat-label>
+                    <input matInput [matDatepicker]="dpEdit1" [(ngModel)]="editTask.start_at">
+                    <mat-datepicker-toggle matSuffix [for]="dpEdit1"></mat-datepicker-toggle>
+                    <mat-datepicker #dpEdit1></mat-datepicker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>End Date</mat-label>
+                    <input matInput [matDatepicker]="dpEdit2" [(ngModel)]="editTask.end_at">
+                    <mat-datepicker-toggle matSuffix [for]="dpEdit2"></mat-datepicker-toggle>
+                    <mat-datepicker #dpEdit2></mat-datepicker>
+                  </mat-form-field>
+
+                  <div style="display:flex; gap:12px;">
+                    <button mat-raised-button color="primary"
+                            (click)="saveEditedTask()"
+                            [disabled]="editing || !editTask.title || !editTask.start_at || !editTask.end_at">
+                      Save Changes
+                    </button>
+
+                    <button mat-stroked-button color="warn"
+                            (click)="deleteEditedTask()"
+                            [disabled]="editing">
+                      Delete Task
+                    </button>
+                  </div>
+                  <div class="muted" *ngIf="editMsg">{{ editMsg }}</div>
+                </div>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
